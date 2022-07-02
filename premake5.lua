@@ -1,6 +1,7 @@
 workspace "Minecraft-Clone"
     platforms { "Win32" , "Win64" }
     configurations { "Debug" , "Release" }
+    startproject "Minecraft-Clone"
 
 
 filter { "platforms:Win32" }
@@ -22,4 +23,5 @@ group ""
 
 include "Olala"
 include "Minecraft-Clone"
+
     
