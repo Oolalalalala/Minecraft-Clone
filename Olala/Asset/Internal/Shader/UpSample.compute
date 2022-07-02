@@ -1,0 +1,40 @@
+#version 450 core
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(rgba16f, binding = 0) uniform image2D imgInput;
+layout(rgba16f, binding = 1) uniform image2D imgOutput;
+
+uniform float u_Radius = 2.f;
+
+
+vec4 upSample(ivec2 uv)
+{
+    vec4 d = u_Radius * vec4(1.0, 1.0, -1.0, 0.0);
+
+    vec4 s;
+    s =  imageLoad(imgInput, ivec2(uv - d.xy));
+    s += imageLoad(imgInput, ivec2(uv - d.wy)) * 2.0;
+    s += imageLoad(imgInput, ivec2(uv - d.zy));
+
+    s += imageLoad(imgInput, ivec2(uv + d.zw)) * 2.0;
+    s += imageLoad(imgInput, ivec2(uv       )) * 4.0;
+    s += imageLoad(imgInput, ivec2(uv + d.xw)) * 2.0;
+
+    s += imageLoad(imgInput, ivec2(uv + d.zy));
+    s += imageLoad(imgInput, ivec2(uv + d.wy)) * 2.0;
+    s += imageLoad(imgInput, ivec2(uv + d.xy));
+
+    return s * 0.0625;
+}
+
+
+void main()
+{
+    vec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+    vec2 imgInputSize = vec2(imageSize(imgInput));
+    vec2 imgOutputSize = vec2(imageSize(imgOutput));
+
+    vec4 value = imageLoad(imgOutput, ivec2(texelCoord));
+    value += upSample(ivec2(texelCoord * imgInputSize / imgOutputSize));
+    imageStore(imgOutput, ivec2(texelCoord), value);
+}

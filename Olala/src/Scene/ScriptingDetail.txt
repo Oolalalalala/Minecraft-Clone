@@ -1,0 +1,6 @@
+# Notes about scripts are strored here
+
+1. Never access [ScriptingComponent], it is for internal storage.
+2. Never store pointers to any other transform, as it might be invalidated.
+3. Always PUBLIC inherit from [Script].
+4. Reference to components should not be stored.

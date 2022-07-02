@@ -1,0 +1,35 @@
+#version 450 core
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(rgba16f, binding = 0) uniform image2D imgInput;
+layout(rgba16f, binding = 1) uniform image2D imgOutput;
+
+
+vec4 downSample(ivec2 uv)
+{
+    vec4 A = imageLoad(imgInput, uv + ivec2(-2.0, 2.0));
+    vec4 B = imageLoad(imgInput, uv + ivec2(0.0, 2.0));
+    vec4 C = imageLoad(imgInput, uv + ivec2(2.0, 2.0));
+    vec4 D = imageLoad(imgInput, uv + ivec2(-1.0, 1.0));
+    vec4 E = imageLoad(imgInput, uv + ivec2(1.0, 1.0));
+    vec4 F = imageLoad(imgInput, uv + ivec2(-2.0, 0.0));
+    vec4 G = imageLoad(imgInput, uv);
+    vec4 H = imageLoad(imgInput, uv + ivec2(2.0, 0.0));
+    vec4 I = imageLoad(imgInput, uv + ivec2(-1.0, -1.0));
+    vec4 J = imageLoad(imgInput, uv + ivec2(1.0, -1.0));
+    vec4 K = imageLoad(imgInput, uv + ivec2(-2.0, -2.0));
+    vec4 L = imageLoad(imgInput, uv + ivec2(0.0, -2.0));
+    vec4 M = imageLoad(imgInput, uv + ivec2(2.0, -2.0));
+
+    return (D + E + I + J + G) * 0.125 + (B + F + L + H) * 0.0625 + (A + C + K + M) * 0.03125;
+}
+
+
+void main() 
+{
+    vec2 texelCoord = vec2(gl_GlobalInvocationID.xy);
+    vec2 imgInputSize = vec2(imageSize(imgInput));
+    vec2 imgOutputSize = vec2(imageSize(imgOutput));
+
+    imageStore(imgOutput, ivec2(texelCoord), downSample(ivec2(texelCoord * imgInputSize / imgOutputSize)));
+}

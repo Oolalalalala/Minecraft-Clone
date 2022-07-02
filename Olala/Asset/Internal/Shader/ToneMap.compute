@@ -1,0 +1,24 @@
+#version 450 core
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(rgba16f, binding = 0) uniform image2D img;
+
+
+void main()
+{
+    //vec3 color = aces(texture(u_Texture, texCoord).rgb);
+
+    ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+    vec3 color = imageLoad(img, texelCoord).rgb;
+
+    // exposure tone mapping
+    float exposure = 1;
+    color = vec3(1.0) - exp(-color * exposure);
+
+
+    // gamma correction
+    const float gamma = 2.2;
+    color = pow(color, vec3(1.0 / gamma));
+
+    imageStore(img, texelCoord, vec4(color, 1.0));
+}

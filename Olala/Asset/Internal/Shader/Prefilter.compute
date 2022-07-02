@@ -1,0 +1,17 @@
+#version 450 core
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(rgba16f, binding = 0) uniform image2D imgInput;
+layout(rgba16f, binding = 1) uniform image2D imgOutput;
+
+
+void main()
+{
+    vec2 texelCoord = vec2(gl_GlobalInvocationID.xy);
+    vec2 imgInputSize = vec2(imageSize(imgInput));
+    vec2 imgOutputSize = vec2(imageSize(imgOutput));
+    vec4 value = imageLoad(imgInput, ivec2(texelCoord * imgInputSize / imgOutputSize));
+    value.rgb = max(value.rgb - vec3(1.0), vec3(0.0));
+
+    imageStore(imgOutput, ivec2(texelCoord), value);
+}
